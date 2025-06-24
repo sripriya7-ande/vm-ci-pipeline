@@ -1,10 +1,6 @@
 pipeline {
   agent any
 
-  environment {
-    ANSIBLE_PRIVATE_KEY = credentials('ec2-user')
-  }
-
   stages {
     stage('Terraform Apply') {
       steps {
@@ -32,12 +28,10 @@ pipeline {
 
     stage('Run Ansible Playbook') {
       steps {
-        sshagent(['ec2-user']) {
+        sshagent(credentials: ['ec2-ssh-key']) {
           sh '''
             cd ansible
             ansible-playbook -i ../inventory/inventory.ini playbook.yml
-              --private-key "$ANSIBLE_PRIVATE_KEY" playbook.yml
-
           '''
         }
       }
