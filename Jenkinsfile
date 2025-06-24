@@ -12,16 +12,17 @@ pipeline {
       }
     }
 
-    stage('Generate Ansible Inventory') {
-      steps {
-        sh '''
-          cd inventory
-          ../terraform/terraform output -raw frontend_ip > frontend_ip.txt
-          ../terraform/terraform output -raw backend_ip > backend_ip.txt
-          ./generate_inventory.sh
-        '''
-      }
+    stage('Ansible Provisioning') {
+  steps {
+    sshagent(['aws-ssh']) {
+      sh '''
+        cd ansible
+        ansible-playbook -i ../inventory/inventory.ini playbook.yml
+      '''
     }
+  }
+}
+
 
     stage('Ansible Provisioning') {
       steps {
