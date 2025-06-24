@@ -1,13 +1,17 @@
 pipeline {
   agent any
+
+  environment {
+    ANSIBLE_PRIVATE_KEY = credentials('ec2-user')
+  }
+
   stages {
     stage('Terraform Apply') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'aws-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'your-aws-credentials-id']]) {
           sh '''
             cd terraform
-            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
             terraform init
             terraform apply -auto-approve
           '''
@@ -16,24 +20,23 @@ pipeline {
     }
 
     stage('Generate Ansible Inventory') {
-  steps {
-    sh '''
-      chmod +x inventory/generate_inventory.sh
-      ./inventory/generate_inventory.sh
-    '''
-  }
-}
-
+      steps {
+        sh '''
+          chmod +x inventory/generate_inventory.sh
+          ./inventory/generate_inventory.sh
+        '''
+      }
+    }
 
     stage('Run Ansible Playbook') {
-  steps {
-    sshagent(['ec2-user']) {
-      sh '''
-        cd ansible
-        ANSIBLE_PRIVATE_KEY=$SSH_AUTH_SOCK
-        ansible-playbook -i ../inventory/inventory.ini playbook.yml
-      '''
+      steps {
+        sshagent(['ec2-user']) {
+          sh '''
+            cd ansible
+            ansible-playbook -i ../inventory/inventory.ini playbook.yml
+          '''
+        }
+      }
     }
   }
 }
-
