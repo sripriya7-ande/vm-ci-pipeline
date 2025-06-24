@@ -36,6 +36,8 @@ pipeline {
           sh '''
             cd ansible
             ansible-playbook -i ../inventory/inventory.ini playbook.yml
+              --private-key "$ANSIBLE_PRIVATE_KEY" playbook.yml
+
           '''
         }
       }
