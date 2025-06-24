@@ -19,6 +19,7 @@ pipeline {
       steps {
         sh '''
           cd inventory
+          chmod +x generate_inventory.sh
           ./generate_inventory.sh
         '''
       }
