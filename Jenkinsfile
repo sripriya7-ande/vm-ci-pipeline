@@ -1,14 +1,17 @@
 pipeline {
   agent any
-
   stages {
     stage('Terraform Apply') {
       steps {
-        sh '''
-          cd terraform
-          terraform init
-          terraform apply -auto-approve
-        '''
+        withCredentials([usernamePassword(credentialsId: 'aws-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          sh '''
+            cd terraform
+            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            terraform init
+            terraform apply -auto-approve
+          '''
+        }
       }
     }
 
@@ -21,7 +24,7 @@ pipeline {
       }
     }
 
-    stage('Run Ansible Playbook') {   // ✅ Renamed to avoid duplication
+    stage('Run Ansible Playbook') {
       steps {
         sshagent(['aws-ssh']) {
           sh '''
