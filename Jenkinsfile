@@ -16,14 +16,14 @@ pipeline {
     }
 
     stage('Generate Ansible Inventory') {
-      steps {
-        sh '''
-          cd inventory
-          chmod +x generate_inventory.sh
-          ./generate_inventory.sh
-        '''
-      }
-    }
+  steps {
+    sh '''
+      chmod +x inventory/generate_inventory.sh
+      ./inventory/generate_inventory.sh
+    '''
+  }
+}
+
 
     stage('Run Ansible Playbook') {
       steps {
