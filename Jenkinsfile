@@ -12,24 +12,23 @@ pipeline {
       }
     }
 
-    stage('Ansible Provisioning') {
-  steps {
-    sshagent(['aws-ssh']) {
-      sh '''
-        cd ansible
-        ansible-playbook -i ../inventory/inventory.ini playbook.yml
-      '''
-    }
-  }
-}
-
-
-    stage('Ansible Provisioning') {
+    stage('Generate Ansible Inventory') {
       steps {
         sh '''
-          cd ansible
-          ansible-playbook -i ../inventory/inventory.ini playbook.yml
+          cd inventory
+          ./generate_inventory.sh
         '''
+      }
+    }
+
+    stage('Run Ansible Playbook') {   // ✅ Renamed to avoid duplication
+      steps {
+        sshagent(['aws-ssh']) {
+          sh '''
+            cd ansible
+            ansible-playbook -i ../inventory/inventory.ini playbook.yml
+          '''
+        }
       }
     }
   }
