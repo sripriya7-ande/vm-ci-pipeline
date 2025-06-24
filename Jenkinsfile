@@ -26,14 +26,14 @@ pipeline {
 
 
     stage('Run Ansible Playbook') {
-      steps {
-        sshagent(['aws-ssh']) {
-          sh '''
-            cd ansible
-            ansible-playbook -i ../inventory/inventory.ini playbook.yml
-          '''
-        }
-      }
+  steps {
+    sshagent(['ec2-user']) {
+      sh '''
+        cd ansible
+        ANSIBLE_PRIVATE_KEY=$SSH_AUTH_SOCK
+        ansible-playbook -i ../inventory/inventory.ini playbook.yml
+      '''
     }
   }
 }
+
