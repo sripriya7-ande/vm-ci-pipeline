@@ -5,21 +5,21 @@ pipeline {
     ANSIBLE_PRIVATE_KEY = credentials('ec2-user')
   }
 
-  stage('Terraform Apply') {
-  steps {
-    withCredentials([[
-      $class: 'AmazonWebServicesCredentialsBinding',
-      credentialsId: 'aws-creds'
-    ]]) {
-      sh '''
-        cd terraform
-        terraform init
-        terraform apply -auto-approve
-      '''
+  stages {
+    stage('Terraform Apply') {
+      steps {
+        withCredentials([[
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'aws-creds'
+        ]]) {
+          sh '''
+            cd terraform
+            terraform init
+            terraform apply -auto-approve
+          '''
+        }
+      }
     }
-  }
-}
-
 
     stage('Generate Ansible Inventory') {
       steps {
